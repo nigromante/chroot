@@ -6,17 +6,38 @@ scriptdir() {                                                          ┊      
     echo "$SCRIPTDIR"
 }
 
-src="/dev/sdb2"
+getMediaDevice() {
+  pp=$( mount -l | grep media | awk '{ print $1 }' )
+  echo "$pp"
+}
+
+getMediaMount() {
+  pp=$( mount -l | grep media | awk '{ print $3 }' )
+  echo "$pp"
+}
+
+if [ "$1" == "" ]; then
+    src=$( getMediaDevice )
+    media=$( getMediaMount )
+else
+    src="$1"
+fi
+
 target="/mnt/otherlinux"
 curdir=$( scriptdir )
 tools="${curdir}/rescue"
 clear
 
+if [ "$src" == "" ]; then
+    src="/dev/sdb2"
+fi
 
+echo "[[ $media ]]"
 echo "[[ $curdir ]]"
 echo "[[ $tools ]]"
 echo "[$src]"
 echo "[$target]"
+
 
 if [ ! -e "$target" ]; then
   echo creating $target
@@ -52,9 +73,17 @@ cmd=" sudo  chroot  ${target} "
 echo $cmd
 echo
 eval $cmd
+echo
 
 cmd=" sudo  umount -Rf   ${target} "
 echo $cmd
 eval $cmd
+echo
+
+if [ "$media" == "malo" ]; then 
+    cmd=" sudo mount ${src} ${media} "
+    echo $cmd
+    eval $cmd
+fi
 
 
